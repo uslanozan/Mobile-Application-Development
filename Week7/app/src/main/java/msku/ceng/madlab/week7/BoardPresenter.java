@@ -51,7 +51,7 @@ public class BoardPresenter implements BoardListener{
         BoardPresenter boardPresenter;
         byte row,col;
 
-        public CellClickListener(BoardPresenter boardPresenter, byte col, byte row) {
+        public CellClickListener(BoardPresenter boardPresenter, byte row, byte col) {
             this.boardPresenter = boardPresenter;
             this.row = row;
             this.col = col;
