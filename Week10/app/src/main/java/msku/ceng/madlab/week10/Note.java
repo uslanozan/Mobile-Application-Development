@@ -1,9 +1,9 @@
 package msku.ceng.madlab.week10;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public class Note implements Serializable {
+public class Note {
+
     private String header;
     private Date date;
     private String filePath;
