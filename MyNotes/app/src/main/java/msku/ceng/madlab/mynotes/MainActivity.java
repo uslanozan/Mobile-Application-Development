@@ -7,6 +7,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,7 +15,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,7 +31,8 @@ public class MainActivity extends AppCompatActivity implements NoteFragment.OnNo
     boolean displayingEditor = false;
     Note editingNote;
     ArrayList<Note> notes = new ArrayList<>();
-
+    ListenerRegistration listenerRegistration;
+    private static final String TAG = "Firebase Demo";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +53,26 @@ public class MainActivity extends AppCompatActivity implements NoteFragment.OnNo
 
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        listenerRegistration = db.collection("notes")
+                .orderBy("date", Query.Direction.DESCENDING)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null){
+                            Log.e(TAG,"Error retrieving notes",error);
+                            return;
+                        }
+                        notes.clear();
+                        for (QueryDocumentSnapshot doc : value){
+                            Log.d(TAG,doc.getData().toString());
+                            Note note = doc.toObject(Note.class);
+                            notes.add(note);
+                        }
+                        NoteFragment listFragment = (NoteFragment)
+                            getSupportFragmentManager().findFragmentByTag("fragment_note");
+                        listFragment.updateNotes(notes);
+                    }
+                });
     }
 
     @Override
